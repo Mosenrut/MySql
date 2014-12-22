@@ -1,0 +1,113 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+
+/*Создать проект «База данных заказов». Создать
+таблицы «Товары» , «Клиенты» и «Заказы».
+Написать код для добавления новых клиентов,
+товаров и оформления заказов.*/
+public class Main {
+
+	 private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
+	    private static final String DB_CONNECTION = "jdbc:mysql://localhost:3306/task2";
+	    private static final String DB_USER = "root";
+	    private static final String DB_PASSWORD = "2222";
+
+	    private static Connection getDBConnection() {
+	        Connection dbConnection = null;
+
+	        try {
+	            Class.forName(DB_DRIVER);
+	        } catch (ClassNotFoundException e) {
+	            e.printStackTrace();
+	            return null;
+	        }
+
+	        try {
+	            dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return null;
+	        }
+
+	        return dbConnection;
+	    }
+	    	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+  	
+    	final String CREATEPRODUCT = "CREATE TABLE product(" +
+        		"id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"+
+        		"NAME VARCHAR(128) DEFAULT NULL,"+
+        		"PRICE VARCHAR(128) DEFAULT NULL);";
+        		  	
+    	final String CREATECLIENT = "CREATE TABLE client(" +
+        		"id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"+
+        		"NAME VARCHAR(128) DEFAULT NULL,"+
+        		"PHONE VARCHAR(128) DEFAULT NULL);";
+    	
+    	final String CREATEORDER = "CREATE TABLE orders(" +
+        		"id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"+
+        		"PID INT NOT NULL,"+
+        		"SID INT NOT NULL,"+
+        		"INFO VARCHAR(128) DEFAULT NULL);";
+        
+    	
+        Connection conn = getDBConnection();
+        if (conn == null) {
+            System.out.println("Error creating connection!");
+            return;
+        }
+        try {
+            try {
+                
+                Statement st = conn.createStatement();
+                try {
+                    st.execute(CREATEPRODUCT);
+                    st.execute(CREATECLIENT);
+                    st.execute(CREATEORDER);
+                } finally {
+                    if (st != null) st.close();
+                }
+		
+               
+                st = conn.createStatement();   
+                 try {
+                
+                	st.executeUpdate("INSERT into products (NAME, PRICE) VALUES('Bread','17hrn');"); 
+                	
+                } finally {
+                if (st != null) st.close();
+                }
+                
+                st = conn.createStatement();  
+                try {
+                    
+                	
+                	st.executeUpdate("INSERT into clients (NAME, PHONE) VALUES('Ivanov','0660941630');"); 
+                	
+                } finally {
+                if (st != null) st.close();
+                }
+                
+                st = conn.createStatement();  
+                try {
+
+                	st.executeUpdate("INSERT into order values (0, pid=(select id from product where name = \""+"Ivanov"+"\"),"
+                			+ "Cid = (select id from client where phone = \""+"0660941630"+"\"),\""+"Ner Order"+"\";");
+                } finally {
+                if (st != null) st.close();
+                }
+                
+
+            } finally {
+                conn.close();
+            
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+}
