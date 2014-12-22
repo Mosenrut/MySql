@@ -1,0 +1,196 @@
+import java.sql.*;
+import java.util.Scanner;
+
+/*Спроектировать базу «Квартиры». Каждая запись
+в базе содержит данные о квартире (район,
+адрес, площадь, кол. комнат, цена). Сделать
+возможность выборки квартир из списка по
+параметрам.*/
+
+public class Main {
+    private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
+    private static final String DB_CONNECTION = "jdbc:mysql://localhost:3306/task1";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "2222";
+
+    private static Connection getDBConnection() {
+        Connection dbConnection = null;
+
+        try {
+            Class.forName(DB_DRIVER);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        try {
+            dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return dbConnection;
+    }
+    
+ 
+    public static void main(String[] args) {
+    	
+    	//Создание базы
+    	System.out.println("Введите название базы квартир");
+        
+        Scanner scan9 = new Scanner(System.in);
+        String base = scan9.nextLine();
+    	
+    	final String CREATE = "CREATE TABLE "+base+ "(" +
+        		"id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"+
+        		"area VARCHAR(128) DEFAULT NULL,"+
+        		"street VARCHAR(128) DEFAULT NULL,"+
+        		"space VARCHAR(128) DEFAULT NULL,"+
+        		"price VARCHAR(128) DEFAULT NULL);";
+    	
+        Connection conn = getDBConnection();
+        if (conn == null) {
+            System.out.println("Error creating connection!");
+            return;
+        }
+        try {
+            try {
+                
+                Statement st = conn.createStatement();
+                try {
+                    st.execute(CREATE);
+                } finally {
+                    if (st != null) st.close();
+                }
+
+           st = conn.createStatement();
+           
+           System.out.println("Введите желаемое количество квартир");
+           Scanner scan = new Scanner(System.in);
+           int flatnum = scan.nextInt();
+           String area []= {"Pecherskij","Obolonskij","Svyatoshiskij","Shevchencovskij","Dneprovskij","Desnyanskij"};	
+   		   String street []={"Kutuzova","Klimkij","Sherbakova","Kikvidze","Malisjko","Predslavinskaya"};
+   		   int space [] = {(int) (1+Math.random()*200),(int) (1+Math.random()*200),(int) (1+Math.random()*200),(int) (1+Math.random()*200),(int) (1+Math.random()*200),(int) (Math.random()*200)};
+   		   int price []={120000,45000,67000,86000,45000,143000};
+           
+           
+        
+            try {
+            	for (int i=0; i<flatnum+1;i++)
+                {
+            st.executeUpdate("INSERT into "+base+" (area, street, space,price) VALUES("+"'"+
+            area[(int) (Math.random()*5)]+"','"+street[(int) (Math.random()*5)]+"','"+
+            space[(int) (Math.random()*5)]+"','"+price[(int) (Math.random()*5)]+"');"); 
+                }
+            } finally {
+            if (st != null) st.close();
+            }
+           
+            System.out.println("Есть следующая база данных:");
+               
+     
+             
+                PreparedStatement ps = conn.prepareStatement("SELECT * FROM "+base+";");
+                try {
+                 
+                    ResultSet rs = ps.executeQuery();
+                    try {
+                       
+                        ResultSetMetaData md = rs.getMetaData(); //
+
+                        for (int i = 1; i <= md.getColumnCount(); i++)
+                            System.out.print(md.getColumnName(i) + "\t\t");
+                        System.out.println();
+
+                        while (rs.next()) {
+                            for (int i = 1; i <= md.getColumnCount(); i++) {
+                                System.out.print(rs.getString(i) + "\t\t");
+                            }
+                            System.out.println();
+                            
+                        }
+                    } finally {
+                        rs.close(); 
+                    }
+                } finally {
+                    if (ps != null) ps.close();
+                }       
+                    //Поисковик
+                    System.out.println("По какому критерию будем подбирать квартиру (введите area,street,space,price)");   
+                    Scanner scan2 = new Scanner(System.in);
+                    String decision = scan2.nextLine();
+                    
+                    switch (decision) {
+                   
+                    case  "area":
+                    	System.out.println("Ведите название района"); 
+                 	Scanner scan3 = new Scanner(System.in); 
+                 	String areasearch = scan3.nextLine();
+
+                 		 ps = conn.prepareStatement("SELECT *  FROM "+base+" WHERE area = \""+areasearch+"\";");
+                 		break;      
+                             
+                    case  "street":
+                    	System.out.println("Ведите название улицы"); 
+                 	Scanner scan4 = new Scanner(System.in); 
+                 	String streetsearch = scan4.nextLine();
+                 		           
+                 		 ps = conn.prepareStatement("SELECT *  FROM "+base+" WHERE street = \""+streetsearch+"\";");
+                 		break;        
+                 		 
+                    case   "space":
+                    	System.out.println("Ведите желаемую площадь"); 
+                 	Scanner scan5 = new Scanner(System.in); 
+                 	int spacesearch = scan5.nextInt();
+                 		           
+                 		 ps = conn.prepareStatement("SELECT *  FROM "+base+" WHERE space = \""+spacesearch+"\";");
+                 		break;     
+                     
+                 		
+                    case    "price":
+                    	System.out.println("Ведите желаемую цену"); 
+                 	Scanner scan6 = new Scanner(System.in); 
+                 	int pricesearch = scan6.nextInt();
+                 		           
+                 		 ps = conn.prepareStatement("SELECT *  FROM "+base+" WHERE price = \""+pricesearch+"\";");
+                 		    
+                    default:
+                    	 System.out.println("Запрос введен не верно");}	  
+            		 
+                       	      
+                                 try {
+                                    
+                                     ResultSet rs = ps.executeQuery();
+                                     try {
+                                         
+                                         ResultSetMetaData md = rs.getMetaData(); //
+
+                                         for (int i = 1; i <= md.getColumnCount(); i++)
+                                             System.out.print(md.getColumnName(i) + "\t\t");
+                                         System.out.println();
+
+                                         while (rs.next()) {
+                                             for (int i = 1; i <= md.getColumnCount(); i++) {
+                                                 System.out.print(rs.getString(i) + "\t\t");
+                                             }
+                                             System.out.println();
+                                               
+                                         }
+                                     } finally {
+                                         rs.close(); 
+                                     }
+                                 } finally {
+                                     if (ps != null) ps.close();
+                                 }
+                 		
+
+            } finally {
+                conn.close();
+            
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+}
